@@ -13,9 +13,16 @@
 
 int column, next_column, lineno;
 
+const char *err_unknown   = "Unknown character";
+const char *err_cmt_close = "Unclosed comment";
+const char *err_cmt_open  = "Unopened comment";
+
+int nesting;
+
 %}
 
 %x COMMENT
+%x LINE_COMMENT
 
 %%
 
@@ -23,6 +30,7 @@ if     { ADVANCE_COLUMN; SET_INFO; return IF; }
 else   { ADVANCE_COLUMN; SET_INFO; return ELSE; }
 return { ADVANCE_COLUMN; SET_INFO; return RETURN; }
 while  { ADVANCE_COLUMN; SET_INFO; return WHILE; }
+for    { ADVANCE_COLUMN; SET_INFO; return FOR; }
 int    { ADVANCE_COLUMN; SET_INFO; return INT; }
 void   { ADVANCE_COLUMN; SET_INFO; return VOID; }
 
@@ -51,15 +59,23 @@ void   { ADVANCE_COLUMN; SET_INFO; return VOID; }
 \[ { ADVANCE_COLUMN; SET_INFO; return LSBRACK; }
 \] { ADVANCE_COLUMN; SET_INFO; return RSBRACK; }
 
+\*\/ { ADVANCE_COLUMN; SET_INFO; yylval.errval = err_cmt_open; return ERROR; }
+
 \n { ADVANCE_LINE; }
 
 \/\*          { ADVANCE_COLUMN; BEGIN(COMMENT); }
 <COMMENT>.    { ADVANCE_COLUMN; }
 <COMMENT>\n   { ADVANCE_LINE; }
-<COMMENT>\*\/ { ADVANCE_COLUMN; BEGIN(INITIAL); }
+<COMMENT>\/\* { ADVANCE_COLUMN; nesting += 1; }
+<COMMENT>\*\/ { ADVANCE_COLUMN; if (nesting) nesting--; else BEGIN(INITIAL); }
+<COMMENT><<EOF>> { ADVANCE_COLUMN; SET_INFO; yylval.errval = err_cmt_close; BEGIN(INITIAL); return ERROR; }
 
-[^ \n\t] { ADVANCE_COLUMN; SET_INFO; return ERROR; }
-. ;
+\/\/ { ADVANCE_COLUMN; BEGIN(LINE_COMMENT); }
+<LINE_COMMENT>. { ADVANCE_COLUMN; }
+<LINE_COMMENT>\n { ADVANCE_LINE; BEGIN(INITIAL); }
+
+[^ \n\t] { ADVANCE_COLUMN; SET_INFO; yylval.errval = err_unknown; return ERROR; }
+. { ADVANCE_COLUMN; }
 
 %%
 

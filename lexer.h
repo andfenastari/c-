@@ -18,9 +18,14 @@ struct YYSTYPE {
         enum op  opval;
         int      intval;
         char    *strval;
+        const char *errval;
     };
 };
 
 extern int column, next_column, lineno;
+
+extern const char *err_unknown;
+extern const char *err_cmt_close;
+extern const char *err_cmt_open;
 
 #endif

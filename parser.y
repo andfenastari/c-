@@ -15,6 +15,7 @@ void yyerror(const char *s);
 %token INT
 %token VOID
 %token WHILE
+%token FOR
 %token RELOP
 %token ADDOP
 %token MULOP
@@ -41,7 +42,40 @@ void yyerror(const char *error) {
     printf("ERROR: %s", error);
 }
 
+char *token_str(enum yytokentype token) {
+    switch (token) {
+        case IF: return "IF";
+        case ELSE: return "ELSE";
+        case RETURN: return "RETURN";
+        case INT: return "INT";
+        case VOID: return "VOID";
+        case WHILE: return "WHILE";
+        case RELOP: return "RELOP";
+        case ADDOP: return "ADDOP";
+        case MULOP: return "MULOP";
+        case ASSIGN: return "ASSIGN";
+        case SCOLON: return "SCOLON";
+        case COMMA: return "COMMA";
+        case LPAREN: return "LPAREN";
+        case RPAREN: return "RPAREN";
+        case LSBRACK: return "LSBRACK";
+        case RSBRACK: return "RSBRACK";
+        case LCBRACK: return "LCBRACK";
+        case RCBRACK: return "RCBRACK";
+        case ID: return "ID";
+        case NUM: return "NUM";
+        case ERROR: return "ERROR";
+    }
+}
+
 int main(int argc, char **argv) {
     int val;
-    while ( (val = yylex()) > 0 ) printf("%d,%d: %d\n", lineno, column, val);
+    while ( (val = yylex()) > 0 ) {
+        printf("%d,%d: %s", lineno+1, column, token_str(val));
+        if (val == ERROR) printf(" %s", yylval.errval);
+        else if (val == NUM) printf(" %d", yylval.intval);
+        else if (val == ID)  printf(" %s", yylval.strval);
+        printf("\n");
+    }
 }
+
