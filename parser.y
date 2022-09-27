@@ -50,6 +50,7 @@ char *token_str(enum yytokentype token) {
         case INT: return "INT";
         case VOID: return "VOID";
         case WHILE: return "WHILE";
+	case FOR: return "FOR";
         case RELOP: return "RELOP";
         case ADDOP: return "ADDOP";
         case MULOP: return "MULOP";
