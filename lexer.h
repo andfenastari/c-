@@ -6,6 +6,8 @@ enum op {
     OP_LT,
     OP_GE,
     OP_LE,
+    OP_EQ,
+    OP_NE,
     OP_ADD,
     OP_SUB,
     OP_MUL,

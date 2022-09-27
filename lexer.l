@@ -41,6 +41,8 @@ void   { ADVANCE_COLUMN; SET_INFO; return VOID; }
 \<   { ADVANCE_COLUMN; SET_INFO; yylval.opval = OP_LT; return RELOP; }
 \>=  { ADVANCE_COLUMN; SET_INFO; yylval.opval = OP_GE; return RELOP; }
 \<=  { ADVANCE_COLUMN; SET_INFO; yylval.opval = OP_LE; return RELOP; }
+==   { ADVANCE_COLUMN; SET_INFO; yylval.opval = OP_EQ; return RELOP; }
+!=   { ADVANCE_COLUMN; SET_INFO; yylval.opval = OP_NE; return RELOP; }
 
 \+  { ADVANCE_COLUMN; SET_INFO; yylval.opval = OP_ADD; return ADDOP; }
 -   { ADVANCE_COLUMN; SET_INFO; yylval.opval = OP_SUB; return ADDOP; }
