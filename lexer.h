@@ -14,7 +14,7 @@ enum op {
     OP_DIV,
 };
 
-struct YYSTYPE {
+struct token {
     int column, lineno;
     union {
         enum op  opval;
