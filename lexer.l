@@ -34,8 +34,8 @@ for    { ADVANCE_COLUMN; SET_INFO; return FOR; }
 int    { ADVANCE_COLUMN; SET_INFO; return INT; }
 void   { ADVANCE_COLUMN; SET_INFO; return VOID; }
 
-[a-zA-Z]+ { ADVANCE_COLUMN; SET_INFO; yylval.strval = symadd(yytext); return ID; } 
-[0-9]+    { ADVANCE_COLUMN; SET_INFO; yylval.intval = atoi(yytext); return NUM; }
+[a-zA-Z][a-zA-Z0-9]* { ADVANCE_COLUMN; SET_INFO; yylval.strval = symadd(yytext); return ID; } 
+[0-9]+               { ADVANCE_COLUMN; SET_INFO; yylval.intval = atoi(yytext); return NUM; }
 
 \>   { ADVANCE_COLUMN; SET_INFO; yylval.opval = OP_GT; return RELOP; }
 \<   { ADVANCE_COLUMN; SET_INFO; yylval.opval = OP_LT; return RELOP; }
