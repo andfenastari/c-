@@ -1,4 +1,4 @@
-c-: lexer.o parser.o symtab.o
+c-: lexer.o parser.o symtab.o ast.o
 	$(CC) -o $@ $^
 
 parser.c parser.h: parser.y
