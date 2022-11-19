@@ -1,0 +1,36 @@
+int x;
+int ys[15];
+
+int foo(void) {
+    int a;
+    int b;
+    int cs[2];
+
+    cs[0] = 1;
+    cs[1] = 2;
+    a = a + b*cs[0];
+    b = cs[1] / 30;
+    cs[0] = a > (b - 1);
+
+    int i;
+    i = 0; 
+
+    daiojre iejrairoje jijasdoijario;
+    while (i < 10) {
+        i = i + 1;
+        a = a * 2;
+    }
+
+    if (a > 10) {
+        return a - 3;
+    } else if (b * 5 < a) {
+        return bar(1, a + b);
+    }
+
+    int j;
+    for (j = 0; j < 10; j = j + 1) {
+        printf(0);
+    }
+
+    return foo();
+}

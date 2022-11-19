@@ -7,15 +7,6 @@ char *kind_str[K_COUNT] = {
 #   define X(item) [K_##item] = #item,
     X_KIND
 #   undef X
-    /*
-    [K_PROGRAM]  = "program",
-    [K_VARDECL]  = "vardecl",
-    [K_FUNDECL]  = "fundecl",
-    [K_ID]       = "id",
-    [K_NUM]      = "num",
-    [K_INT]      = "int",
-    [K_VOID]     = "void",
-    */
 };
 
 struct ast_node *ast_node_new(enum kind kind) {

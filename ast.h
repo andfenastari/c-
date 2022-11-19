@@ -1,38 +1,48 @@
 #ifndef AST_H_INCLUDE
 #define AST_H_INCLUDE
 
-#define X_KIND     \
-    X(PROGRAM)   \
-    X(VARDECL)   \
-    X(FUNDECL)   \
-    X(PARAMLIST) \
-    X(PARAM)     \
-    X(LISTPARAM) \
-    X(ID)        \
-    X(NUM)       \
-    X(INT)       \
-    X(VOID)      
+#include "lexer.h"
+
+#define X_KIND         \
+    X(PROGRAM)         \
+    X(ERROR)           \
+    X(BLOCK)           \
+    X(VAR_DECL)        \
+    X(LIST_DECL)       \
+    X(FUN_DECL)        \
+    X(LOCAL_DECL_LIST) \
+    X(STMT_LIST)       \
+    X(IF)              \
+    X(IF_ELSE)         \
+    X(WHILE)           \
+    X(FOR)             \
+    X(RETURN)          \
+    X(RETURN_EXPR)     \
+    X(FUNCALL)         \
+    X(ASSIGN)          \
+    X(VAR)             \
+    X(AREF)            \
+    X(REL)             \
+    X(SUM)             \
+    X(MULT)            \
+    X(PARAM_LIST)      \
+    X(PARAM)           \
+    X(LIST_PARAM)      \
+    X(ARG_LIST)        \
+                       \
+    X(ID)              \
+    X(NUM)             \
+    X(INT)             \
+    X(VOID)            \
+    X(RELOP)           \
+    X(ADDOP)           \
+    X(MULOP)     
 
 enum kind {
 #   define X(item) K_##item,
     X_KIND
 #   undef X
     K_COUNT,
-
-/*
-    K_PROGRAM,
-    K_VARDECL,
-    K_FUNDECL,
-    K_PARAMLIST,
-    K_PARAM,
-    K_LISTPARAM,
-    K_ID,
-    K_NUM,
-    K_INT,
-    K_VOID,
-
-    K_COUNT,
-*/
 };
 
 struct ast_node {
@@ -44,8 +54,9 @@ struct ast_node {
     struct ast_node *next_sibling;
 
     union {
-        int  intval;
-        char *strval;
+        int     intval;
+        char    *strval;
+        enum op opval;
     };
 };
 
