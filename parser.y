@@ -42,8 +42,11 @@ struct ast_node *root;
 %type <ast_node> program decl_list decl var_decl fun_decl err funcall args
 %type <ast_node> block type_spec param params param_list id num int void arg_list factor
 %type <ast_node> stmt_list stmt expr assign_expr rel_expr var sum_expr mul_expr
-%type <ast_node> return_stmt if_stmt while_stmt for_stmt
+%type <ast_node> return_stmt if_stmt while_stmt for_stmt 
 %type <token> INT VOID ID NUM SCOLON LSBRACK RSBRACK RELOP ADDOP MULOP
+
+%precedence RPAREN
+%precedence ELSE
 
 %%
 
@@ -65,13 +68,12 @@ param_list      : param_list COMMA param { $$ = $1; ast_node_append($$, $3); }
 param           : type_spec id { $$ = ast_node_new(K_PARAM); ast_node_append($$, $1); ast_node_append($$, $2); }
                 | type_spec id LSBRACK RSBRACK { $$ = ast_node_new(K_LIST_PARAM); ast_node_append($$, $1); ast_node_append($$, $2); }
 
-block           : LCBRACK stmt_list RCBRACK { $$ = ast_node_new(K_BLOCK); ast_node_append($$, $2); }
-/*
-local_decl_list : var_decl local_decl_list { $$ = $2; ast_node_preppend($$, $1); }
-                | %empty { $$ = ast_node_new(K_LOCAL_DECL_LIST); }
-*/
+block           : LCBRACK stmt_list RCBRACK { $$ = $2; }
+                | LCBRACK err RCBRACK { $$ = $2; }
+
 stmt_list       : stmt stmt_list { $$ = $2; ast_node_preppend($$, $1); }
-                | %empty { $$ = ast_node_new(K_STMT_LIST); }
+                | %empty { $$ = ast_node_new(K_BLOCK); }
+
 stmt            : expr SCOLON { $$ = $1; }
                 | var_decl
                 | block
@@ -106,14 +108,12 @@ var             : id
 return_stmt     : RETURN SCOLON { $$ = ast_node_new(K_RETURN); }
                 | RETURN expr SCOLON { $$ = ast_node_new(K_RETURN_EXPR); ast_node_append($$, $2); } 
 
-while_stmt      : WHILE LPAREN expr RPAREN block { $$ = ast_node_new(K_WHILE); ast_node_append($$, $3); ast_node_append($$, $5); }
+while_stmt      : WHILE LPAREN expr RPAREN stmt { $$ = ast_node_new(K_WHILE); ast_node_append($$, $3); ast_node_append($$, $5); }
 
-for_stmt        : FOR LPAREN expr SCOLON expr SCOLON expr RPAREN block { $$ = ast_node_new(K_FOR); ast_node_append($$, $3); ast_node_append($$, $5); ast_node_append($$, $7); ast_node_append($$, $9); }
+for_stmt        : FOR LPAREN expr SCOLON expr SCOLON expr RPAREN stmt { $$ = ast_node_new(K_FOR); ast_node_append($$, $3); ast_node_append($$, $5); ast_node_append($$, $7); ast_node_append($$, $9); }
+if_stmt         : IF LPAREN expr RPAREN stmt ELSE stmt { $$ = ast_node_new(K_IF_ELSE); ast_node_append($$, $3); ast_node_append($$, $5); ast_node_append($$, $7); } 
+                | IF LPAREN expr RPAREN stmt { $$ = ast_node_new(K_IF); ast_node_append($$, $3); ast_node_append($$, $5); }
 
-if_stmt         : IF LPAREN expr RPAREN block { $$ = ast_node_new(K_IF); ast_node_append($$, $3); ast_node_append($$, $5); }
-                | IF LPAREN expr RPAREN block ELSE block { $$ = ast_node_new(K_IF_ELSE); ast_node_append($$, $3); ast_node_append($$, $5); ast_node_append($$, $7); }
-                | IF LPAREN expr RPAREN block ELSE if_stmt { $$ = ast_node_new(K_IF_ELSE); ast_node_append($$, $3); ast_node_append($$, $5); ast_node_append($$, $7); }
-         
 type_spec       : void
                 | int
 

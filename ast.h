@@ -10,8 +10,6 @@
     X(VAR_DECL)        \
     X(LIST_DECL)       \
     X(FUN_DECL)        \
-    X(LOCAL_DECL_LIST) \
-    X(STMT_LIST)       \
     X(IF)              \
     X(IF_ELSE)         \
     X(WHILE)           \

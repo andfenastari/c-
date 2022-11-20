@@ -12,10 +12,16 @@ int foo(void) {
     b = cs[1] / 30;
     cs[0] = a > (b - 1);
 
+    if (i == 0)
+      if (j == 0)
+        return 1;
+      else
+        return 0;
+    else
+        return 3;
+
     int i;
     i = 0; 
-
-    daiojre iejrairoje jijasdoijario;
     while (i < 10) {
         i = i + 1;
         a = a * 2;
