@@ -5,7 +5,7 @@ parser.c parser.h: parser.y lexer.h ast.h
 	bison -d -Wcounterexamples -o parser.c parser.y
 
 lexer.l: lexer.h parser.h symtab.h
-ast.o: ast.c ast.h
+ast.o: ast.c ast.h lexer.h
 
 .PHONY: clean run
 clean:

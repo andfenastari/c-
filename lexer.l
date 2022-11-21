@@ -10,7 +10,7 @@
 #define ADVANCE_COLUMN column = next_column; next_column += yyleng
 #define ADVANCE_LINE   lineno += 1; column = next_column = 0
 #define TOKEN          yylval.token
-#define SET_INFO       TOKEN.column = column; TOKEN.lineno = lineno
+#define SET_INFO       TOKEN.loc.column = column; TOKEN.loc.lineno = lineno
 
 
 int column, next_column, lineno;
@@ -37,7 +37,7 @@ int    { ADVANCE_COLUMN; SET_INFO; return INT; }
 void   { ADVANCE_COLUMN; SET_INFO; return VOID; }
 
 [a-zA-Z][a-zA-Z0-9]* { ADVANCE_COLUMN; SET_INFO; TOKEN.strval = symadd(yytext); return ID; } 
-[0-9]+               { ADVANCE_COLUMN; SET_INFO; TOKEN.intval = atoi(yytext); return NUM; }
+-?[0-9]+               { ADVANCE_COLUMN; SET_INFO; TOKEN.intval = atoi(yytext); return NUM; }
 
 \>   { ADVANCE_COLUMN; SET_INFO; TOKEN.opval = OP_GT; return RELOP; }
 \<   { ADVANCE_COLUMN; SET_INFO; TOKEN.opval = OP_LT; return RELOP; }
@@ -48,6 +48,9 @@ void   { ADVANCE_COLUMN; SET_INFO; return VOID; }
 
 \+  { ADVANCE_COLUMN; SET_INFO; TOKEN.opval = OP_ADD; return ADDOP; }
 -   { ADVANCE_COLUMN; SET_INFO; TOKEN.opval = OP_SUB; return ADDOP; }
+
+\+\+ { ADVANCE_COLUMN; SET_INFO; TOKEN.opval = OP_INC; return INCOP; }
+--   { ADVANCE_COLUMN; SET_INFO; TOKEN.opval = OP_DEC; return INCOP; }
 
 \*  { ADVANCE_COLUMN; SET_INFO; TOKEN.opval = OP_MUL; return MULOP; }
 \/  { ADVANCE_COLUMN; SET_INFO; TOKEN.opval = OP_DIV; return MULOP; }

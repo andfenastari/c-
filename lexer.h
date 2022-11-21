@@ -12,10 +12,16 @@ enum op {
     OP_SUB,
     OP_MUL,
     OP_DIV,
+    OP_INC,
+    OP_DEC,
+};
+
+struct location {
+    int column, lineno;
 };
 
 struct token {
-    int column, lineno;
+    struct location loc;
     union {
         enum op  opval;
         int      intval;

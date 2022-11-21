@@ -4,6 +4,8 @@
 #include "ast.h"
 #include "parser.h"
 
+#define SET_INFO(s, e) $$->location.start = (s).loc; $$->location.end = (e).loc
+
 int yylex();
 void yyerror(const char *s);
 
@@ -26,6 +28,7 @@ struct ast_node *root;
 %token RELOP
 %token ADDOP
 %token MULOP
+%token INCOP
 %token ASSIGN
 %token SCOLON
 %token COMMA
@@ -41,9 +44,9 @@ struct ast_node *root;
 
 %type <ast_node> program decl_list decl var_decl fun_decl err funcall args
 %type <ast_node> block type_spec param params param_list id num int void arg_list factor
-%type <ast_node> stmt_list stmt expr assign_expr rel_expr var sum_expr mul_expr
+%type <ast_node> stmt_list stmt expr assign_expr rel_expr var sum_expr mul_expr inc_expr
 %type <ast_node> return_stmt if_stmt while_stmt for_stmt 
-%type <token> INT VOID ID NUM SCOLON LSBRACK RSBRACK RELOP ADDOP MULOP
+%type <token> INT VOID ID NUM SCOLON LSBRACK RSBRACK RELOP ADDOP MULOP INCOP
 
 %precedence RPAREN
 %precedence ELSE
@@ -51,68 +54,89 @@ struct ast_node *root;
 %%
 
 program         : decl_list { root = $1; }
+
 decl_list       : decl decl_list { $$ = $2; ast_node_preppend($$, $1); }
                 | %empty { $$ = ast_node_new(K_PROGRAM); }
-decl            : var_decl { $$ = $1; }
-                | fun_decl { $$ = $1; }
-                | err SCOLON { $$ = $1; }
 
-var_decl        : type_spec id SCOLON { $$ = ast_node_new(K_VAR_DECL); ast_node_append($$, $1); ast_node_append($$, $2); }
-                | type_spec id LSBRACK num RSBRACK SCOLON { $$ = ast_node_new(K_LIST_DECL); ast_node_append($$, $1); ast_node_append($$, $2); ast_node_append($$, $4); }
+decl            : var_decl
+                | fun_decl
+                | err SCOLON
+                | err RCBRACK
 
-fun_decl        : type_spec id LPAREN params RPAREN block { $$ = ast_node_new(K_FUN_DECL); ast_node_append($$, $1); ast_node_append($$, $2); ast_node_append($$, $4); ast_node_append($$, $6); }
-params          : void { $$ = $1; }
-                | param_list { $$ = $1; }
+var_decl        : type_spec id SCOLON { $$ = ast_node_make(K_VAR_DECL, 2, $1, $2); }
+                | type_spec id ASSIGN expr SCOLON { $$ = ast_node_make(K_VAR_DEFN, 3, $1, $2, $4); }
+                | type_spec id LSBRACK num RSBRACK SCOLON { $$ = ast_node_make(K_LIST_DECL, 3, $1, $2, $4); }
+
+fun_decl        : type_spec id LPAREN params RPAREN block { $$ = ast_node_make(K_FUN_DECL, 4, $1, $2, $4, $6); }
+
+params          : void
+                | param_list
+
 param_list      : param_list COMMA param { $$ = $1; ast_node_append($$, $3); }
-                | param { $$ = ast_node_new(K_PARAM_LIST); ast_node_append($$, $1); }
-param           : type_spec id { $$ = ast_node_new(K_PARAM); ast_node_append($$, $1); ast_node_append($$, $2); }
-                | type_spec id LSBRACK RSBRACK { $$ = ast_node_new(K_LIST_PARAM); ast_node_append($$, $1); ast_node_append($$, $2); }
+                | param { $$ = ast_node_make(K_PARAM_LIST, 1, $1); }
+
+param           : type_spec id { $$ = ast_node_make(K_PARAM, 2, $1, $2); }
+                | type_spec id LSBRACK RSBRACK { $$ = ast_node_make(K_LIST_PARAM, 2, $1, $2); }
+                | err
 
 block           : LCBRACK stmt_list RCBRACK { $$ = $2; }
-                | LCBRACK err RCBRACK { $$ = $2; }
 
 stmt_list       : stmt stmt_list { $$ = $2; ast_node_preppend($$, $1); }
                 | %empty { $$ = ast_node_new(K_BLOCK); }
 
-stmt            : expr SCOLON { $$ = $1; }
+stmt            : expr SCOLON 
                 | var_decl
                 | block
                 | return_stmt
                 | while_stmt
                 | for_stmt
                 | if_stmt
-                | err SCOLON { $$ = $1; }
+                | err 
 
 expr            : assign_expr
                 | rel_expr
-assign_expr     : var ASSIGN expr { $$ = ast_node_new(K_ASSIGN); ast_node_append($$, $1); ast_node_append($$, $3); }
-rel_expr        : sum_expr RELOP sum_expr { $$ = ast_node_new(K_RELOP); ast_node_append($$, $1); ast_node_append($$, $3); $$->opval = ($2).opval; }
+
+assign_expr     : var ASSIGN expr { $$ = ast_node_make(K_ASSIGN, 2, $1, $3); }
+
+rel_expr        : sum_expr RELOP sum_expr { $$ = ast_node_make(K_RELOP, 2, $1, $3); $$->opval = ($2).opval; }
                 | sum_expr
-sum_expr        : sum_expr ADDOP mul_expr { $$ = ast_node_new(K_ADDOP); ast_node_append($$, $1); ast_node_append($$, $3); $$->opval = ($2).opval; }
+
+sum_expr        : sum_expr ADDOP mul_expr { $$ = ast_node_make(K_ADDOP, 2, $1, $3); $$->opval = ($2).opval; }
                 | mul_expr
-mul_expr        : mul_expr MULOP factor { $$ = ast_node_new(K_MULOP); ast_node_append($$, $1); ast_node_append($$, $3); $$->opval = ($2).opval; }
+
+mul_expr        : mul_expr MULOP factor { $$ = ast_node_make(K_MULOP, 2, $1, $3); $$->opval = ($2).opval; }
+                | inc_expr
+
+inc_expr        : INCOP factor { $$ = ast_node_make(K_INCOP, 1, $2); $$->opval = ($1).opval; }
+                | factor INCOP { $$ = ast_node_make(K_INCOP, 1, $1); $$->opval = ($2).opval; } 
                 | factor
+
 factor          : LPAREN expr RPAREN { $$ = $2; }
                 | var
                 | funcall
                 | num
-funcall         : id LPAREN args RPAREN { $$ = ast_node_new(K_FUNCALL); ast_node_append($$, $1); ast_node_append($$, $3); }
+
+funcall         : id LPAREN args RPAREN { $$ = ast_node_make(K_FUNCALL, 2, $1, $3); }
+
 args            : arg_list
                 | %empty { $$ = ast_node_new(K_ARG_LIST); }
+
 arg_list        : expr COMMA arg_list { $$ = $3; ast_node_preppend($$, $1); }
-                | expr { $$ = ast_node_new(K_ARG_LIST); ast_node_append($$, $1); }
+                | expr { $$ = ast_node_make(K_ARG_LIST, 1, $1); }
+
 var             : id
-                | id LSBRACK expr RSBRACK { $$ = ast_node_new(K_AREF); ast_node_append($$, $1); ast_node_append($$, $3); } 
+                | id LSBRACK expr RSBRACK { $$ = ast_node_make(K_AREF, 2, $1, $3); } 
 
 
 return_stmt     : RETURN SCOLON { $$ = ast_node_new(K_RETURN); }
-                | RETURN expr SCOLON { $$ = ast_node_new(K_RETURN_EXPR); ast_node_append($$, $2); } 
+                | RETURN expr SCOLON { $$ = ast_node_make(K_RETURN_EXPR, 1, $2); } 
 
-while_stmt      : WHILE LPAREN expr RPAREN stmt { $$ = ast_node_new(K_WHILE); ast_node_append($$, $3); ast_node_append($$, $5); }
+while_stmt      : WHILE LPAREN expr RPAREN stmt { $$ = ast_node_make(K_WHILE, 2, $3, $5); }
 
-for_stmt        : FOR LPAREN expr SCOLON expr SCOLON expr RPAREN stmt { $$ = ast_node_new(K_FOR); ast_node_append($$, $3); ast_node_append($$, $5); ast_node_append($$, $7); ast_node_append($$, $9); }
-if_stmt         : IF LPAREN expr RPAREN stmt ELSE stmt { $$ = ast_node_new(K_IF_ELSE); ast_node_append($$, $3); ast_node_append($$, $5); ast_node_append($$, $7); } 
-                | IF LPAREN expr RPAREN stmt { $$ = ast_node_new(K_IF); ast_node_append($$, $3); ast_node_append($$, $5); }
+for_stmt        : FOR LPAREN expr SCOLON expr SCOLON expr RPAREN stmt { $$ = ast_node_make(K_FOR, 4, $3, $5, $7, $9); }
+
+if_stmt         : IF LPAREN expr RPAREN stmt ELSE stmt { $$ = ast_node_make(K_IF_ELSE, 3, $3, $5, $7); } 
+                | IF LPAREN expr RPAREN stmt { $$ = ast_node_make(K_IF, 2, $3, $5); }
 
 type_spec       : void
                 | int

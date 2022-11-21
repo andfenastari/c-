@@ -8,6 +8,7 @@
     X(ERROR)           \
     X(BLOCK)           \
     X(VAR_DECL)        \
+    X(VAR_DEFN)        \
     X(LIST_DECL)       \
     X(FUN_DECL)        \
     X(IF)              \
@@ -21,8 +22,6 @@
     X(VAR)             \
     X(AREF)            \
     X(REL)             \
-    X(SUM)             \
-    X(MULT)            \
     X(PARAM_LIST)      \
     X(PARAM)           \
     X(LIST_PARAM)      \
@@ -34,7 +33,8 @@
     X(VOID)            \
     X(RELOP)           \
     X(ADDOP)           \
-    X(MULOP)     
+    X(MULOP)           \
+    X(INCOP)     
 
 enum kind {
 #   define X(item) K_##item,
@@ -48,8 +48,9 @@ struct ast_node {
 
     struct ast_node *first_child;
     struct ast_node *last_child;
-
     struct ast_node *next_sibling;
+
+    struct location start, end;
 
     union {
         int     intval;
@@ -61,8 +62,11 @@ struct ast_node {
 extern char *kind_str[K_COUNT];
 
 struct ast_node *ast_node_new(enum kind node_kind);
+struct ast_node *ast_node_make(enum kind node_kind, int n, ...);
 void             ast_node_append(struct ast_node *parent, struct ast_node *child);
-void             ast_node_preppend(struct ast_node *parend, struct ast_node *child);
+void             ast_node_preppend(struct ast_node *parent, struct ast_node *child);
+void             ast_node_preppend_all(struct ast_node *parent, int n, ...);
+void             ast_node_append_all(struct ast_node *parent, int n, ...);
 void             ast_node_print(struct ast_node *node, int ident);
 
 #endif

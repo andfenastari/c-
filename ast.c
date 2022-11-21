@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 char *kind_str[K_COUNT] = {
 #   define X(item) [K_##item] = #item,
@@ -15,6 +16,19 @@ struct ast_node *ast_node_new(enum kind kind) {
     node->first_child = NULL;
     node->last_child = NULL;
     node->next_sibling = NULL;
+
+    return node;
+}
+
+struct ast_node *ast_node_make(enum kind kind, int n, ...) {
+    struct ast_node *node = ast_node_new(kind);
+
+    va_list children;
+    va_start(children, n);
+
+    while(n--) ast_node_append(node, va_arg(children, struct ast_node*));
+
+    va_end(children);
 
     return node;
 }
@@ -41,6 +55,29 @@ void ast_node_preppend(struct ast_node *parent, struct ast_node *child) {
     parent->first_child = child;
 }
 
+void ast_node_append_all(struct ast_node *parent, int n, ...) {
+    va_list children;
+    va_start(children, n);
+
+    while (n--) {
+        struct ast_node *child = va_arg(children, struct ast_node*);
+        ast_node_append(parent, child);
+    }
+
+    va_end(children);
+}
+
+void ast_node_preppend_all(struct ast_node *parent, int n, ...) {
+    va_list children;
+    va_start(children, n);
+
+    while (n--) {
+        struct ast_node *child = va_arg(children, struct ast_node*);
+        ast_node_preppend(parent, child);
+    }
+
+    va_end(children);
+}
 void ast_node_print(struct ast_node *node, int ident) {
     printf("%*s%s", ident, " ", kind_str[node->kind]);
     if (node->kind == K_ID) {
