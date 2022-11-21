@@ -1,19 +1,25 @@
 #ifndef LEXER_H_INCLUDE
 #define LEXER_H_INCLUDE
 
+#define X_OP \
+    X(GT)    \
+    X(LT)    \
+    X(GE)    \
+    X(LE)    \
+    X(EQ)    \
+    X(NE)    \
+    X(ADD)   \
+    X(SUB)   \
+    X(MUL)   \
+    X(DIV)   \
+    X(INC)   \
+    X(DEC)
+
 enum op {
-    OP_GT,
-    OP_LT,
-    OP_GE,
-    OP_LE,
-    OP_EQ,
-    OP_NE,
-    OP_ADD,
-    OP_SUB,
-    OP_MUL,
-    OP_DIV,
-    OP_INC,
-    OP_DEC,
+#   define X(op) OP_##op,
+    X_OP
+#   undef X
+    OP_COUNT,
 };
 
 struct location {

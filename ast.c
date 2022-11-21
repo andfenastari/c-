@@ -10,6 +10,12 @@ char *kind_str[K_COUNT] = {
 #   undef X
 };
 
+char *op_str[OP_COUNT] = {
+#   define X(item) [OP_##item] = #item,
+    X_OP
+#   undef X
+};
+
 struct ast_node *ast_node_new(enum kind kind) {
     struct ast_node *node = malloc(sizeof(struct ast_node));
     node->kind = kind;
@@ -84,6 +90,13 @@ void ast_node_print(struct ast_node *node, int ident) {
         printf(" = %s\n", node->strval);
     } else if (node->kind == K_NUM) {
         printf(" = %d\n", node->intval);
+    } else if (
+        node->kind == K_ADDOP ||
+        node->kind == K_MULOP ||
+        node->kind == K_RELOP ||
+        node->kind == K_INCOP
+    ) {
+        printf(" = %s\n", op_str[node->opval]);
     } else {
         printf("\n");
     }

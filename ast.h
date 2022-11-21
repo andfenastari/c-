@@ -60,6 +60,7 @@ struct ast_node {
 };
 
 extern char *kind_str[K_COUNT];
+extern char *op_str[OP_COUNT];
 
 struct ast_node *ast_node_new(enum kind node_kind);
 struct ast_node *ast_node_make(enum kind node_kind, int n, ...);
