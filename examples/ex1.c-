@@ -34,9 +34,7 @@ int foo(void) {
     }
 
     int j;
-    for (j = 0; j < 10; j = j + 1) {
-        printf(0);
-    }
+    for (j = 0; j < 10; j = j + 1) printf(0); 
 
     return foo();
 }

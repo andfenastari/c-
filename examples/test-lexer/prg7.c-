@@ -5,5 +5,5 @@ int multr (int m, int n)
     if(n == 0)
       return 0;
     else
-      return (m + multr(m, n-1));
+      return (m + multr(m, n - 1));
   }

@@ -19,7 +19,6 @@
     X(RETURN_EXPR)     \
     X(FUNCALL)         \
     X(ASSIGN)          \
-    X(VAR)             \
     X(AREF)            \
     X(REL)             \
     X(PARAM_LIST)      \
@@ -61,6 +60,7 @@ struct ast_node {
 
 extern char *kind_str[K_COUNT];
 extern char *op_str[OP_COUNT];
+extern struct ast_node *root;
 
 struct ast_node *ast_node_new(enum kind node_kind);
 struct ast_node *ast_node_make(enum kind node_kind, int n, ...);
@@ -69,5 +69,6 @@ void             ast_node_preppend(struct ast_node *parent, struct ast_node *chi
 void             ast_node_preppend_all(struct ast_node *parent, int n, ...);
 void             ast_node_append_all(struct ast_node *parent, int n, ...);
 void             ast_node_print(struct ast_node *node, int ident);
+struct ast_node *ast_node_child(struct ast_node *node, int child);
 
 #endif

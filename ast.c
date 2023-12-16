@@ -16,6 +16,8 @@ char *op_str[OP_COUNT] = {
 #   undef X
 };
 
+struct ast_node *root;
+
 struct ast_node *ast_node_new(enum kind kind) {
     struct ast_node *node = malloc(sizeof(struct ast_node));
     node->kind = kind;
@@ -106,4 +108,13 @@ void ast_node_print(struct ast_node *node, int ident) {
         ast_node_print(child, ident+1);
         child = child->next_sibling;
     }
+}
+
+struct ast_node *ast_node_child(struct ast_node *node, int n) {
+    for (struct ast_node *child = node->first_child; child != NULL; child = child->next_sibling) {
+        if (n == 0) return child;
+        n--;
+    }
+
+    return NULL;
 }

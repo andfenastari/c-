@@ -9,8 +9,6 @@
 int yylex();
 void yyerror(const char *s);
 
-struct ast_node *root;
-
 %}
 
 %union {
@@ -179,20 +177,4 @@ char *token_str(enum yytokentype token) {
         case NUM: return "NUM";
         case ERROR: return "ERROR";
     }
-}
-
-int main(int argc, char **argv) {
-    int status = yyparse();
-    if (status != 0) return status;
-    ast_node_print(root, 1);
-    /*
-    int val;
-    while ( (val = yylex()) > 0 ) {
-        printf("%d,%d: %s", lineno+1, column, token_str(val));
-        if (val == ERROR) printf(" %s", yylval.errval);
-        else if (val == NUM) printf(" %d", yylval.intval);
-        else if (val == ID)  printf(" %s", yylval.strval);
-        printf("\n");
-    }
-    */
 }

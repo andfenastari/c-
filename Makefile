@@ -1,4 +1,4 @@
-c-: lexer.o parser.o symtab.o ast.o
+c-: lexer.o parser.o symtab.o ast.o codegen.o main.o
 	$(CC) -o $@ $^
 
 parser.c parser.h: parser.y lexer.h ast.h 
@@ -6,6 +6,8 @@ parser.c parser.h: parser.y lexer.h ast.h
 
 lexer.l: lexer.h parser.h symtab.h
 ast.o: ast.c ast.h lexer.h
+codegen.o: codegen.c codegen.h ast.h
+main.o: main.c lexer.h parser.h ast.h codegen.h
 
 .PHONY: clean run
 clean:
